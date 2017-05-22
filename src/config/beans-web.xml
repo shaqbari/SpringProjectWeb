@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+
+	<!--Spring MVC에 필요한 bean들을 자동으로 등록해 주는 태그  -->
+	<mvc:annotation-driven/>
+	<!-- 
+	위 태그는 아래의 태그를 내부적으로 자동으로 등록해 준다.
+	<bean id="jsonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"/>
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="jsonHttpMessageConverter"/>
+			</list>
+		</property>
+	</bean> 버전이 바뀌면서 class이름이 바뀌어 안되는거 같다?-->
+	<!-- <bean id="jsonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="jsonHttpMessageConverter"/>
+			</list>
+		</property>
+	</bean> --> 
+	
+	<!-- DispatcherServlet의 변경된 url-pattern때문에 필요한 태그 설정 -->
+	<mvc:default-servlet-handler/>
+	<!-- DispatcherServlet은  url-pattern을 /와 같이 설정하게 되면서
+	tomcat의 server.xml에 정의되어 있는 url-pattern /을 무시하게 된다.
+	결국 DispatcherServlet url-pattern을 재정의 하게 되어서 
+	DispatcherServlet은 더이상 동작할 수 없게 된것이다.
+	Spring에서는 이를 해결하기 위해서 위의 태그 설정을 지원한다.-->
+	
+		
+	<!-- 아래 주석은 컨트롤러에서 포워딩 되는 .jsp확장자를 생략 할 수 있다.  -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+
+</beans>

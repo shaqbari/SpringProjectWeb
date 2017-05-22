@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+	
+	<!--MapperScannerConfigurer 설정  
+		예상하지 않은 다른 객체가 등록되어 오류가 발생할수 있다. ex)여기서 userDao 인터페이스
+		오류 방지하려면 annotation을 이용하자
+	-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="myspring.user.dao"/>
+		<property name="annotationClass" value="myspring.user.dao.MyMapper"/>
+	</bean>				
+	
+	<!--Mapper설정  -->
+	<!-- <bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="myspring.user.dao.UserMapper"></property>
+		<property name="sqlSessionTemplate" ref="sqlSession"></property>
+	</bean> -->
+	
+	<!-- mybatis-spring 설정  -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="configLocation" value="classpath:/config/SqlMapConfig.xml"/>
+		<property name="mapperLocations">
+			<list>
+				<value>classpath:/config/User.xml</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory"/>	
+	</bean>
+	
+	
+	<!-- annotation 기반 AOP 설정 -->
+	<aop:aspectj-autoproxy/>
+	
+	
+	
+	<bean id="performanceTraceAdvice" class="myspring.ch14_aop.xml.PerformanceTraceAdvice"></bean>
+	<aop:config>
+		<aop:aspect id="traceAspect" ref="performanceTraceAdvice">
+			<aop:around pointcut="execution(public * myspring.user.service..*(..))" method="trace"/>
+		
+		</aop:aspect>
+	</aop:config>
+	
+	
+	<context:property-placeholder location="classpath:config/value.properties"/>
+	<!--config of componenet scan-->
+	<context:component-scan base-package="myspring.user, myspring.ch15_aop.annot"></context:component-scan>
+	
+	<!-- config of DataSource -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+		<property name="driverClass" value="${db.driverClass}"/>
+		<property name="url" value="${db.url}"/>
+		<property name="username" value="${db.username}"/>
+		<property name="password" value="${db.password}"/>
+	</bean>
+	
+	<bean id="hello" class="myspring.ch06_di.xml.Hello" >
+		<!-- setName(name) -->
+		<property name="name" value="Spring" />
+		
+		<!-- setPrinter(Printer) -->
+		<property name="printer" ref="stringPrinter"/>
+	</bean>
+	
+	<!-- <bean id="hello2" class="myspring.ch06_di.xml.Hello">
+		<constructor-arg index="0" value="${myname}"></constructor-arg>
+		<constructor-arg index="1" ref="${myprinter}"></constructor-arg>	
+		<property name="names">
+			<list>
+				<value>${value1}</value>
+				<value>${value2}</value>
+				<value>${value3}</value>
+			</list>
+		</property>
+	
+	</bean>  spring mvc사용할때 중복정의로 되어 안될수 있으므로 주석처리하자.-->	
+	
+	<!-- <bean id="hello2" class="myspring.ch06_di.xml.Hello">
+		<constructor-arg index="0" value="Spring2"></constructor-arg>
+		<constructor-arg index="1" ref="stringPrinter"></constructor-arg>	
+		<property name="names">
+			<list>
+				<value>AOP</value>
+				<value>Spring</value>
+				<value>DI</value>
+			</list>
+		</property>
+	
+	</bean> -->
+		
+	<!-- <bean id="hello3" class="myspring.ch06_di.xml.Hello">
+		<constructor-arg name="name" value="Spring2"></constructor-arg>
+		<constructor-arg name="printer" ref="stringPrinter"></constructor-arg>	
+	</bean> -->
+	
+	
+	
+
+	<bean class="myspring.ch06_di.xml.StringPrinter" id="stringPrinter"/>
+	<bean class="myspring.ch06_di.xml.ConsolePrinter" id="consolePrinter"/>
+
+</beans>
